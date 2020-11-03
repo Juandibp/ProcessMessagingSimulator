@@ -3,12 +3,12 @@ from abc import ABC, abstractmethod
 
 ##abc doc: https://docs.python.org/3/library/abc.html
 ## Interface Implementation
-class process(ABC):
+class processInterface(ABC):
     """
     The Product interface declares the operations that all concrete products
     must implement.
     """
 
     @abstractmethod
-    def operation(self) -> str:
+    def send(self) -> str:
         pass
