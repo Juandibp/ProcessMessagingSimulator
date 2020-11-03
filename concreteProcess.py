@@ -1,4 +1,4 @@
-from process import *
+from processMethodInterface import *
 
 class unblocking(processInterface):
     def send(self):
