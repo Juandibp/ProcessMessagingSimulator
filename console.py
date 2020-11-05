@@ -1,6 +1,8 @@
 import sys
 import pprint
 
+mailbox = [] # lista de objetos clases mensajes
+
 userTerms = {
     "send":"metodo de envio",
     "recieve":"metodo de recepcion",
