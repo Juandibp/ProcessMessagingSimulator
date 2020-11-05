@@ -1,0 +1,6 @@
+create()
+help(exit)
+help(create)
+help()
+execFromFile("testBatch.txt")
+exit()

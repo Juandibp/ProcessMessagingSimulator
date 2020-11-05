@@ -27,16 +27,6 @@ userTerms = {
 
 def start():
     config = consoleStartingSequence()
-    consoleOptions = {          
-                '__builtins__':None,
-                'help':assist,
-                'exit':halt,
-                'create':consoleCreate,
-                # 'send':consoleSend,
-                # 'receive':consoleReceive,
-                # 'display':consoleDisplay,
-                # 'execFromFile':consoleBatch 
-                }
     while True:
         try:
             req = input("> ")
@@ -44,7 +34,6 @@ def start():
         except Exception as e:
             print("No se pudo reconocer el comando recibido. Asegurese de no haber cometido algun error en la escritura del comando o alguno de los parametros o ingrese 'help()' para obtener mas informacion.")
             print(e)
-    print("Saliendo del programa...")
 
 
 def assist(fun=None):
@@ -122,6 +111,27 @@ def consoleStartingSequence():
           "\nIngrese 'exit()' para salir.\n")
     return selectedOptions
 
+def consoleBatch(path: str, instructionLimit = -1):
+    '''execFromFile(<path> [, <limit>]) Esta funcionalidad permite ejecutar un bloque de comandos desde un archivo de texto dado por 'path', \
+        opcionalmente se puede especificar un limite de cantidad de instrucciones a ejecutar.'''
+    l = 0
+    try:
+        f = open(path)
+        for line in f:
+            l += 1
+            if line and instructionLimit:
+                opt = consoleOptions.copy()
+                opt["execFromFile"] = None #no queremos que desde un archivo se puedan ejecutar otros archivos
+                instructionLimit -= 1
+                exec(line, opt)
+            elif instructionLimit:
+                continue
+            else:
+                break
+    except FileNotFoundError:
+        print("Parece que el archivo no se encontró o no existe.")
+    except Exception as e:
+        print("La instrucción en la línea " + str(l) + " no se pudo ejecutar. Revise que el comando y los parámetros sean correctos o escriba 'help()' o 'help(<comando>)' para más ayuda.")
 
 def getOptionPath(opt:dict, route:list = []) -> list:
     '''Recorre un diccionario devolviendo una ruta a un elemento.'''
@@ -162,6 +172,17 @@ def halt():
 def consoleCreate():
     '''<Syntax> Con esta funcion puedes crear un proceso.'''
     pass
+
+consoleOptions = {          
+            '__builtins__':None,
+            'help':assist,
+            'exit':halt,
+            'create':consoleCreate,
+            'execFromFile':consoleBatch,
+            # 'send':consoleSend,
+            # 'receive':consoleReceive,
+            # 'display':consoleDisplay,
+            }
 
 if __name__ == "__main__":
     start()
