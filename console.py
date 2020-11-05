@@ -71,6 +71,15 @@ def reqNumberInput(min:int = None , max:int = None) -> int:
         print("La seleccion que hizo no es valida. Intente de nuevo.")
         return reqNumberInput(min, max)
 
+def reqTypeValue(t:type, message:str):
+    '''Esta funcion interna le pide al usuario un valor del tipo 't'.'''
+    while True:
+        try:
+            inputVal = t(input(message))
+            return inputVal
+        except:
+            print("El valor ingresado no es un '" +t.__name__+ "'.")
+
 def consoleStartingSequence():
     '''Esta funcion permite seleccionar la configuracion inicial del programa'''
 
@@ -87,8 +96,10 @@ def consoleStartingSequence():
             "indirect":["static","dynamic"],
         },
         "format":{
-            "content":"content",
-            "length":["fixed","dynamic"]
+            "length":{
+                "fixed":int,
+                "dynamic":"dynamic"
+            }
         },
         "queueMethod":["fifo","priority"]
     }
@@ -102,12 +113,12 @@ def consoleStartingSequence():
             selectedOptions[key] = value[sel]
         elif isinstance(value, dict):
             selectedOptions[key] = getOptionPath(value, [key])
-    print("Esta es la configuración seleccionada:")
+    print("\nEsta es la configuración seleccionada:\n")
     pprint.pprint(selectedOptions)
     print("\nIniciando programa..."+
           "\nIngrese 'help()' o 'help(<comando>)' para obtener ayuda."+
           "\nIngrese 'exit()' para salir.\n")
-    return "hola"
+    return selectedOptions
 
 
 def getOptionPath(opt:dict, route:list = []) -> list:
@@ -121,6 +132,12 @@ def getOptionPath(opt:dict, route:list = []) -> list:
     if isinstance(value, str):
         route.append(value)
         return route[1:]
+    elif isinstance(value, type):
+        route.append(key)
+        print("Se necesita un valor de tipo '" +value.__name__+ "' para configurar el " + " ".join(list(map(userTerms.get, route)))+".")
+        inputVal = reqTypeValue(int, "Ingrese el valor a continuación: ")
+        route.append(inputVal)
+        return route[1:]        
     else:
         route.append(key)
         #ej:   ¿Que tipo de chica sentada en la rama incrustada en el palo sembrado en el hoyo a la orilla del mar quiere?
