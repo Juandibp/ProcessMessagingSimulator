@@ -1,6 +1,10 @@
 import sys
 import pprint
 
+from config import *
+
+
+
 mailbox = [] # lista de objetos clases mensajes
 
 userTerms = {
@@ -25,8 +29,13 @@ userTerms = {
     "implicit": "implicito"
 }
 
+
+
 def start():
-    config = consoleStartingSequence()
+    conf = consoleStartingSequence()
+
+    configObj =config(conf["send"], conf["recieve"], conf["addressing"], conf["format"], conf["queueMethod"])
+
     while True:
         try:
             req = input("> ")
@@ -171,6 +180,8 @@ def halt():
 
 def consoleCreate():
     '''<Syntax> Con esta funcion puedes crear un proceso.'''
+
+    
     pass
 
 consoleOptions = {          
