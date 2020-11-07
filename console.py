@@ -1,5 +1,13 @@
 import sys
 import pprint
+try:
+    import simpy
+except ModuleNotFoundError:
+    print("Se van a instalar las dependencias. Solo se va a tener que hacer esto una vez...")
+    import os
+    os.system("pip install simpy")
+    os.
+    import simpy
 
 from config import *
 
@@ -60,10 +68,10 @@ def reqNumberInput(min:int = None , max:int = None) -> int:
     '''Esta funcion interna le pide al usuario un numero'''
     try:
         selected = int(input("Seleccione una opcion: "))
-        if min and min > selected:
+        if min != None and min > selected:
             print("La seleccion tiene que ser mayor o igual que " + str(min) + ". Intente de nuevo.")
             return reqNumberInput(min, max)
-        if max and max < selected:
+        if max != None and max < selected:
             print("La seleccion tiene que ser menor o igual que " + str(max) + ". Intente de nuevo.")
             return reqNumberInput(min, max)
         return selected
