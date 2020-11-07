@@ -6,7 +6,6 @@ except ModuleNotFoundError:
     print("Se van a instalar las dependencias. Solo se va a tener que hacer esto una vez...")
     import os
     os.system("pip install simpy")
-    os.
     import simpy
 
 from config import *
