@@ -13,6 +13,7 @@ from config import *
 
 
 mailbox = [] # lista de objetos clases mensajes
+processes = [] #lista con todos los procesos
 
 userTerms = {
     "send":"metodo de envio",

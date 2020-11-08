@@ -22,23 +22,31 @@ class BroadcastPipe(object):
         self.pipes.append(pipe)
         return pipe
 
-def sender(name, env, out_pipe): # en este caso el sender es nonblocking 
+def sendDirectMessage(sender, receiver):
+    global env
+    pipe = simpy.Store(env)
+    env.process(sender(sender, env, pipe))
+    env.process(receiver(receiver, env, pipe))
+
+
+
+def sender(process, env, out_pipe): # en este caso el sender es nonblocking 
     while True:
         # Esperar a transmision
         yield env.timeout(random.randint(6,10))
 
-        msg = (env.now, '%s holis en %d' % (name, env.now))
+        msg = (env.now, '%s holis en %d' % (process.id, env.now))
         out_pipe.put(msg)
 
-def receiver(name, env, in_pipe): # en este caso el receiver es blocking 
+def receiver(process, env, in_pipe): # en este caso el receiver es blocking 
     while True:
         msg = yield in_pipe.get() #block until message is received
 
         if msg[0] < env.now:
-            print("Recibio el mensaje tarde: en tiempo %d: %s received message: %s." % (env.now, name, msg[1]))
+            print("Recibio el mensaje tarde: en tiempo %d: %s received message: %s." % (env.now, process.id, msg[1]))
             
         else:
-            print("en tiempo %d: %s received message: %s." % (env.now, name, msg[1]))
+            print("en tiempo %d: %s received message: %s." % (env.now, process.id, msg[1]))
 
         yield env.timeout(random.randint(4,8))
 
