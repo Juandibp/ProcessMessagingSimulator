@@ -1,19 +1,12 @@
 import sys
 import pprint
-try:
-    import simpy
-except ModuleNotFoundError:
-    print("Se van a instalar las dependencias. Solo se va a tener que hacer esto una vez...")
-    import os
-    os.system("pip install simpy")
-    import simpy
-
 from config import *
 from process import *
 
 controller = None
 
-mailbox = [] # lista de objetos clases mensajes
+configuration = None
+
 
 userTerms = {
     "send":"metodo de envio",
@@ -34,19 +27,21 @@ userTerms = {
     "priority":"prioridad",
     "fixed":"fijo",
     "explicit": "explicito",
-    "implicit": "implicito"
+    "implicit": "implicito",
+    "lenMsg":"tamaño de cola de mensajes",
+    "lenProcesses":"número máximo de procesos"
 }
 
 
 
 def start():
-    global controller
+    global controller, configuration
 
     conf = consoleStartingSequence()
 
-    configObj =config(conf["send"], conf["recieve"], conf["addressing"], conf["format"], conf["queueMethod"])
+    configuration =config(conf["send"], conf["recieve"], conf["addressing"], conf["format"], conf["queueMethod"], conf["lenMsg"], conf["lenProcesses"])
 
-    controller = ProcessController(configObj)
+    controller = ProcessController(configuration)
 
     while True:
         try:
@@ -88,7 +83,10 @@ def reqTypeValue(t:type, message:str):
     while True:
         try:
             inputVal = t(input(message))
-            return inputVal
+            if inputVal < 0:
+                print("Este valor no puede ser negativo. ")
+            else:
+                return inputVal 
         except:
             print("El valor ingresado no es un '" +t.__name__+ "'.")
 
@@ -105,7 +103,7 @@ def consoleStartingSequence():
                 # "send":"send",
                 "recieve":["explicit", "implicit"]
             },
-            "indirect":["static","dynamic"],
+            "indirect":"indirect",
         },
         "format":{
             "length":{ #no worries
@@ -113,18 +111,24 @@ def consoleStartingSequence():
                 "dynamic":"dynamic"
             }
         },
-        "queueMethod":["fifo","priority"]
+        "queueMethod":["fifo","priority"],
+        "lenMsg":int,
+        "lenProcesses":int
     }
     selectedOptions = {}
     for (key, value) in configOptions.items():
-        print("\nEstas son las opciones para configurar el " + userTerms[key])
-        if isinstance(value, list):
-            for i in range(len(value)):
-                print("~|",i, userTerms[value[i]])            
-            sel = reqNumberInput(0, len(value) - 1)
-            selectedOptions[key] = value[sel]
-        elif isinstance(value, dict):
-            selectedOptions[key] = getOptionPath(value, [key])
+        if isinstance(value, type):
+            print( "\nPara configurar el '"+userTerms[key]+"' se necesita un valor de tipo '" + value.__name__)
+            selectedOptions[key] = reqTypeValue(value,"Ingrese el valor a continuación: ")
+        else:
+            print("\nEstas son las opciones para configurar el " + userTerms[key])
+            if isinstance(value, list):
+                for i in range(len(value)):
+                    print("~|",i, userTerms[value[i]])            
+                sel = reqNumberInput(0, len(value) - 1)
+                selectedOptions[key] = value[sel]
+            elif isinstance(value, dict):
+                selectedOptions[key] = getOptionPath(value, [key])
     print("\nEsta es la configuración seleccionada:\n")
     pprint.pprint(selectedOptions)
     print("\nIniciando programa..."+
@@ -191,20 +195,29 @@ def halt():
     sys.exit(0)
 
 def consoleCreate(name:str):
-    '''<Syntax> Con esta funcion puedes crear un proceso.'''    
+    '''create(nombre:str) Con esta funcion puedes crear un proceso con el nombre dado como parámetro.'''    
     try:
         controller.addProcess(Process(name))
-    except:
-        print("Algo salio mal")
+    except Exception as e:
+        print("Algo salio mal: " + str(e))
 
-def consoleSend(sender, receiver, msg):
-    # TODO docu
-    # TODO aqui podriamos hacer la validacion del largo de mensaje
-    controller.send(sender, receiver, msg)
+def consoleSend(sender, receiver, msg, priority = 0):
+    '''send(sender:str, receiver:str, msg:str, priority:int = 0) Esta funcionalidad te permite mandar un mensaje enviado por el proceso con id sender para el proceso con id receiver. En caso de que la disciplina de colas lo contemple, se puede ingresar la prioridad del mensaje.'''
+    if isinstance(configuration.format[-1], int):
+        if len(msg) > configuration.format[-1]:
+            print("El mensaje ingresado debe ser de una longitud menor o igual que " + configuration.format[-1] + ". Por favor intente de nuevo.")
+            return
+    controller.send(sender, receiver, msg, priority)
 
 def consoleReceive(sender, receiver):
-    # TODO docu
+    '''receive(sender, receiver) Esta funcion permite recibir un mensaje como receiver eviado por sender.'''
     controller.receive(sender, receiver)
+
+def consoleDisplay():
+    #TODO display
+    '''display() Muestra el estado actual de la aplicacion. Esto incluye la configuracion, el mailbox, el estado de los procesos y los mensajes en cola.'''
+    pass
+
 
 consoleOptions = {          
             '__builtins__':None,
@@ -214,7 +227,7 @@ consoleOptions = {
             'batch':consoleBatch,
             'send':consoleSend,
             'receive':consoleReceive,
-            # 'display':consoleDisplay,
+            'display':consoleDisplay,
             }
 
 if __name__ == "__main__":

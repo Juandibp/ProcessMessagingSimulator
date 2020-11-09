@@ -1,7 +1,7 @@
 create("process 1")
 create("process 2")
+create("process 3")
+create("process 4")
 send("process 1", "process 2", "Hola mundo")
 receive("process 1", "process 2")
 
-help(create)
-help()

@@ -20,9 +20,11 @@
 ##    return getattr(self.instance, name)
 
 class config:
-    def __init__(self, psend, precieve, pdir, pformat, pqueues):
+    def __init__(self, psend, precieve, pdir, pformat, pqueues, plenmensajes=-1, plenprocesos=-1):
       self.send = psend #sync
       self.recieve = precieve #sync
       self.dir = pdir #lista de parametros
       self.format = pformat
-      self. queues = pqueues
+      self.queues = pqueues
+      self.lenMensajes = plenmensajes
+      self.lenProcesos = plenprocesos
