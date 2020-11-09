@@ -5,3 +5,11 @@ class message:
         self.receiver = preciever
         self.message = pmessage
         self.priority = ppriority
+    
+    def showInConsole(self, showPriority=False):
+        print("- - - - - - - - - - - - - - - ")
+        print("Mensaje de: " + self.sender.name)
+        print("Para: " + self.receiver.name)
+        print("Contenido del mensaje: " + self.message)
+        if self.priority != 0:
+            print("Prioridad: " + str(self.priority))

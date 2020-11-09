@@ -53,13 +53,22 @@ def start():
 
 
 def assist(fun=None):
-    '''Puedes llamar a esta funcion para obtener información del programa o cualquier comando si se provee.'''
+    '''help([<comando>]) Puedes llamar a esta funcion para obtener información del programa o cualquier comando si se provee.'''
     try:
         if(fun):
             print(fun.__doc__)
         else:
-            # TODO Que esto en realidad imprima la lista de comandos :v
-            print("Esta el la lista de comandos y demás")
+            print("Ayuda general: Este programa simula un sistema de mensajeria entre procesos.")
+            print("Puedes usar diferentes comandos para crear procesos o enviar y recibir mensajes.")
+            print("Los comandos que puedes ejecutar son los siguientes:")
+            print("- = - = - = - = - = - = - = - = -\n")
+            options = list(consoleOptions.values())[1:]
+            # print(consoleOptions)
+            for elem in options:
+                print(elem.__doc__)
+                print("")
+
+
     except Exception as e:
         print(e)
 
@@ -137,8 +146,7 @@ def consoleStartingSequence():
     return selectedOptions
 
 def consoleBatch(path: str, instructionLimit = -1):
-    '''execFromFile(<path> [, <limit>]) Esta funcionalidad permite ejecutar un bloque de comandos desde un archivo de texto dado por 'path', \
-        opcionalmente se puede especificar un limite de cantidad de instrucciones a ejecutar.'''
+    '''batch(path:str [, limit:int]) Esta funcionalidad permite ejecutar un bloque de comandos desde un archivo de texto dado por 'path', opcionalmente se puede especificar un limite de cantidad de instrucciones a ejecutar.'''
     l = 0
     try:
         f = open(path)
@@ -190,7 +198,7 @@ def getOptionPath(opt:dict, route:list = []) -> list:
             return getOptionPath(value, route) 
 
 def halt():
-    '''Detiene la ejecución del programa.'''
+    '''exit() Detiene la ejecución del programa.'''
     print("Cerrando programa...")
     sys.exit(0)
 
@@ -202,21 +210,42 @@ def consoleCreate(name:str):
         print("Algo salio mal: " + str(e))
 
 def consoleSend(sender, receiver, msg, priority = 0):
-    '''send(sender:str, receiver:str, msg:str, priority:int = 0) Esta funcionalidad te permite mandar un mensaje enviado por el proceso con id sender para el proceso con id receiver. En caso de que la disciplina de colas lo contemple, se puede ingresar la prioridad del mensaje.'''
+    '''send(sender:str, receiver:str, msg:str[, priority:int = 0]) Esta funcionalidad te permite mandar un mensaje enviado por el proceso con id sender para el proceso con id receiver. En caso de que la disciplina de colas lo contemple, se puede ingresar la prioridad del mensaje.'''
     if isinstance(configuration.format[-1], int):
         if len(msg) > configuration.format[-1]:
-            print("El mensaje ingresado debe ser de una longitud menor o igual que " + configuration.format[-1] + ". Por favor intente de nuevo.")
+            print("El mensaje ingresado debe ser de una longitud menor o igual que " + str(configuration.format[-1]) + ". Por favor intente de nuevo.")
             return
+    if configuration.queues != "priority" and priority != 0:
+        raise RuntimeError("La configuración no admite mensajes con prioridad.")
     controller.send(sender, receiver, msg, priority)
 
 def consoleReceive(sender, receiver):
-    '''receive(sender, receiver) Esta funcion permite recibir un mensaje como receiver eviado por sender.'''
+    '''receive(sender:str, receiver:str) Esta funcion permite recibir un mensaje como receiver eviado por sender.'''
     controller.receive(sender, receiver)
 
 def consoleDisplay():
-    #TODO display
     '''display() Muestra el estado actual de la aplicacion. Esto incluye la configuracion, el mailbox, el estado de los procesos y los mensajes en cola.'''
-    pass
+    print("\nEsta es la configuración seleccionada: \n")
+    print("Metodo de envio: " + configuration.send)
+    print("Metodo de recepción: " + configuration.recieve)
+    print("Metodo de direccionamiento: " + str(configuration.dir))
+    print("Tipo de formato: " + str(configuration.format))
+    print("Disciplina de manejo de colas: " + str(configuration.queues))
+    print("Máximo de mensajes en cola: " + str(configuration.lenMensajes))
+    print("Máximo de procesos creables: " + str(configuration.lenProcesos))
+    # isSendBlock = (configuration.send == "blocking")
+    # imprimir procesos
+    isReceiveBlock = (configuration.recieve == "blocking")
+    isDirectAddressing = (configuration.dir[-1] != "indirect")
+    isPriority = (configuration.queues == "priority")
+    print("\nLos procesos son los siguientes:\n")
+    for p in controller.processes.values():
+        p.showInConsole(isReceiveBlock, isDirectAddressing, isPriority)
+    # imprimir el buzon
+    if not isDirectAddressing:
+        print("\n El Buzon de mensajes es el siguiente:")
+        for m in controller.mailbox:
+            m.showInConsole()
 
 
 consoleOptions = {          

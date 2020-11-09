@@ -7,6 +7,18 @@ class Process:
         self.waitingFrom = ""
         self.active = True
         self.messages = []
+    
+    def showInConsole(self, isRecBlocking:bool, isDirectAdressing:bool, hasPriority:bool):
+        print("-----------------------")
+        print("Nombre de proceso: " + self.name)
+        print("Estado: " + ("Activo." if self.active else "Bloqueado."))
+        if self.waitingFrom != "":
+            print("Esperando mensaje de: " + self.waitingFrom)
+        if isDirectAdressing:
+            print("Cola de mensajes: {" )
+            for m in self.messages:
+                m.showInConsole(hasPriority)
+            print("}")
 
 class ProcessController:
     def __init__(self, conf:config):
@@ -36,7 +48,7 @@ class ProcessController:
             return 
         if receiverProc.waitingFrom == sender:
             #es un receive blocking
-            print(self.configuration.queues)
+            # print(self.configuration.queues)
             if self.configuration.recieve == "blocking":
                 receiverProc.active = True
                 receiverProc.waitingFrom = ""
@@ -50,50 +62,12 @@ class ProcessController:
                 print("El proceso " + senderProc.name + " ha enviado el mensaje. Pero no ha sido recibido.")
         else:
             sendTo.append(m)
-            print(self.configuration.queues)
+            # print(self.configuration.queues)
             if self.configuration.queues == "priority":
                 sendTo.sort(key = lambda msg: msg.priority)
                 sendTo.reverse()
             senderProc.active = False
             print("El proceso " + senderProc.name + " ha enviado el mensaje. Pero no ha sido recibido.")
-        # if self.configuration.dir[-1] == "direct":
-            # if receiverProc.waitingFrom == sender:
-            #     #es un receive blocking
-            #     if self.configuration.recieve == "blocking":
-            #         receiverProc.active = True
-            #         receiverProc.waitingFrom = ""
-            #         print("El proceso " + receiverProc.name + " recibio el mensaje: " + m.message + ". De parte de " + m.sender.name)
-            #     else:
-            #         receiverProc.messages.append(m)
-            #         receiverProc.messages.sort(key = lambda msg: msg.priority)
-            #         receiverProc.messages.reverse()
-            #         print("El proceso " + senderProc.name + " ha enviado el mensaje. Pero no ha sido recibido.")
-            # else:
-            #     # TODO si el envio es blocking
-            #     receiverProc.messages.append(m)
-            #     receiverProc.messages.sort(key = lambda msg: msg.priority)
-            #     receiverProc.messages.reverse()
-            #     senderProc.active = False
-            #     print("El proceso " + senderProc.name + " ha enviado el mensaje. Pero no ha sido recibido.")
-        # else:
-        #     if receiverProc.waitingFrom == sender:
-        #         #es un receive blocking
-        #         if self.configuration.recieve == "blocking":
-        #             receiverProc.active = True
-        #             receiverProc.waitingFrom = ""
-        #             print("El proceso " + receiverProc.name + " recibio el mensaje: " + m.message + ". De parte de " + m.sender.name)
-        #         else:
-        #             self.mailbox.append(m)
-        #             self.mailbox.sort(key = lambda msg: msg.priority)
-        #             self.mailbox.reverse()
-        #             print("El proceso " + senderProc.name + " ha enviado el mensaje en el mailbox. Pero no ha sido recibido.")
-        #     else:
-        #         # TODO si el envio es blocking
-        #         self.mailbox.append(m)
-        #         self.mailbox.sort(key = lambda msg: msg.priority)
-        #         self.mailbox.reverse()
-        #         senderProc.active = False
-        #         print("El proceso " + senderProc.name + " ha enviado el mensaje. Pero no ha sido recibido.")
 
     def receive(self, sender:str, receiver:str):
         if not self.processes.get(sender):
