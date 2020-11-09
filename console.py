@@ -9,11 +9,11 @@ except ModuleNotFoundError:
     import simpy
 
 from config import *
+from process import *
 
-
+controller = None
 
 mailbox = [] # lista de objetos clases mensajes
-processes = [] #lista con todos los procesos
 
 userTerms = {
     "send":"metodo de envio",
@@ -40,9 +40,13 @@ userTerms = {
 
 
 def start():
+    global controller
+
     conf = consoleStartingSequence()
 
     configObj =config(conf["send"], conf["recieve"], conf["addressing"], conf["format"], conf["queueMethod"])
+
+    controller = ProcessController(configObj)
 
     while True:
         try:
@@ -98,13 +102,13 @@ def consoleStartingSequence():
         "recieve": ["blocking","non-blocking","arrival-test"],
         "addressing": {
             "direct": {
-                "send":"send",
+                # "send":"send",
                 "recieve":["explicit", "implicit"]
             },
             "indirect":["static","dynamic"],
         },
         "format":{
-            "length":{
+            "length":{ #no worries
                 "fixed":int,
                 "dynamic":"dynamic"
             }
@@ -186,20 +190,30 @@ def halt():
     print("Cerrando programa...")
     sys.exit(0)
 
-def consoleCreate():
-    '''<Syntax> Con esta funcion puedes crear un proceso.'''
+def consoleCreate(name:str):
+    '''<Syntax> Con esta funcion puedes crear un proceso.'''    
+    try:
+        controller.addProcess(Process(name))
+    except:
+        print("Algo salio mal")
 
-    
-    pass
+def consoleSend(sender, receiver, msg):
+    # TODO docu
+    # TODO aqui podriamos hacer la validacion del largo de mensaje
+    controller.send(sender, receiver, msg)
+
+def consoleReceive(sender, receiver):
+    # TODO docu
+    controller.receive(sender, receiver)
 
 consoleOptions = {          
             '__builtins__':None,
             'help':assist,
             'exit':halt,
             'create':consoleCreate,
-            'execFromFile':consoleBatch,
-            # 'send':consoleSend,
-            # 'receive':consoleReceive,
+            'batch':consoleBatch,
+            'send':consoleSend,
+            'receive':consoleReceive,
             # 'display':consoleDisplay,
             }
 

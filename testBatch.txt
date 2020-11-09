@@ -1,6 +1,7 @@
-create()
-help(exit)
+create("process 1")
+create("process 2")
+send("process 1", "process 2", "Hola mundo")
+receive("process 1", "process 2")
+
 help(create)
 help()
-execFromFile("testBatch.txt")
-exit()
