@@ -18,7 +18,7 @@ class Program:
         self.console.start()
 
     def printOutput(self, value, *args):
-        self.output.appendPlainText(value + (str(args) if len(args) != 0 else "") + "\n")
+        self.output.appendPlainText(value + (''.join(" "+str(elem) for elem in args) if len(args) != 0 else ""))
 
     def reqInput(self, val):
         if val == None:

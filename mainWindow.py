@@ -24,7 +24,7 @@ class Ui_MainWindow(object):
         self.consoleInput.setFont(font)
         self.consoleInput.setObjectName("consoleInput")
         self.label = QtWidgets.QLabel(self.centralwidget)
-        self.label.setGeometry(QtCore.QRect(20, 480, 55, 16))
+        self.label.setGeometry(QtCore.QRect(20, 480, 55, 21))
         font = QtGui.QFont()
         font.setPointSize(16)
         self.label.setFont(font)

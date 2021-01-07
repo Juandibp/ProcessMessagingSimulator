@@ -86,7 +86,7 @@ def reqNumberInput(min:int = None , max:int = None) -> int:
             return reqNumberInput(min, max)
         return selected
     except Exception as e:
-        
+
         output("La seleccion que hizo no es valida. Intente de nuevo.")
         return reqNumberInput(min, max)
 
@@ -141,7 +141,7 @@ def consoleStartingSequence():
             elif isinstance(value, dict):
                 selectedOptions[key] = getOptionPath(value, [key])
     output("\nEsta es la configuración seleccionada:\n")
-    pprint.pprint(selectedOptions)
+    output(pprint.pformat(selectedOptions))
     output("\nIniciando programa..."+
           "\nIngrese 'help()' o 'help(<comando>)' para obtener ayuda."+
           "\nIngrese 'exit()' para salir.\n")
