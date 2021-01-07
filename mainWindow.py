@@ -35,6 +35,7 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setPointSize(12)
         self.consoleOutput.setFont(font)
+        self.consoleOutput.setReadOnly(True)
         self.consoleOutput.setObjectName("consoleOutput")
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
         self.label_2.setGeometry(QtCore.QRect(10, 10, 55, 21))
