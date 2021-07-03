@@ -43,7 +43,7 @@ def start():
 
     configuration =config(conf["send"], conf["recieve"], conf["addressing"], conf["format"], conf["queueMethod"], conf["lenMsg"], conf["lenProcesses"])
 
-    controller = ProcessController(configuration)
+    controller = ProcessController(configuration, output)
 
     while True:
         try:
@@ -207,7 +207,7 @@ def halt():
 def consoleCreate(name:str):
     '''create(nombre:str) Con esta funcion puedes crear un proceso con el nombre dado como parámetro.'''    
     try:
-        controller.addProcess(Process(name))
+        controller.addProcess(Process(name,poutput=output))
     except Exception as e:
         output("Algo salio mal: " + str(e))
 
@@ -247,7 +247,7 @@ def consoleDisplay():
     if not isDirectAddressing:
         output("\n El Buzon de mensajes es el siguiente:")
         for m in controller.mailbox:
-            m.showInConsole()
+            m.showInConsole(output=output)
 
 
 consoleOptions = {          

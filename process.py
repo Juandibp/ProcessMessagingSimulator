@@ -2,26 +2,28 @@ from message import message
 from config import *
 
 class Process:
-    def __init__(self, pname, pmessages=[]):
+    def __init__(self, pname, pmessages=[], poutput=None):
         self.name = pname
         self.waitingFrom = ""
         self.active = True
         self.messages = []
+        self.outPut = poutput if poutput != None else print
     
     def showInConsole(self, isRecBlocking:bool, isDirectAdressing:bool, hasPriority:bool):
-        print("-----------------------")
-        print("Nombre de proceso: " + self.name)
-        print("Estado: " + ("Activo." if self.active else "Bloqueado."))
+        self.outPut("-----------------------")
+        self.outPut("Nombre de proceso: " + self.name)
+        self.outPut("Estado: " + ("Activo." if self.active else "Bloqueado."))
         if self.waitingFrom != "":
-            print("Esperando mensaje de: " + self.waitingFrom)
+            self.outPut("Esperando mensaje de: " + self.waitingFrom)
         if isDirectAdressing:
-            print("Cola de mensajes: {" )
+            self.outPut("Cola de mensajes: {" )
             for m in self.messages:
                 m.showInConsole(hasPriority)
-            print("}")
+            self.outPut("}")
 
 class ProcessController:
-    def __init__(self, conf:config):
+    def __init__(self, conf:config, poutput=print):
+        self.outPut = poutput if poutput != None else print
         self.configuration = conf
         self.processes = {}
         self.mailbox = [] # lista de objetos clases mensajes
@@ -44,7 +46,7 @@ class ProcessController:
         m = message(senderProc, receiverProc, msg, priority)
         sendTo = receiverProc.messages if self.configuration.dir[0] == "direct" else self.mailbox
         if  len(sendTo) >= self.configuration.lenMensajes:
-            print("Se ha exedido el límite de mensajes en cola.")
+            self.outPut("Se ha exedido el límite de mensajes en cola.")
             return 
         if receiverProc.waitingFrom == sender:
             #es un receive blocking
@@ -52,14 +54,14 @@ class ProcessController:
             if self.configuration.recieve == "blocking":
                 receiverProc.active = True
                 receiverProc.waitingFrom = ""
-                print("El proceso " + receiverProc.name + " recibio el mensaje: " + m.message + ". De parte de " + m.sender.name)
+                self.outPut("El proceso " + receiverProc.name + " recibio el mensaje: " + m.message + ". De parte de " + m.sender.name)
             else:
                 sendTo.append(m)
                 if self.configuration.queues == "priority":
                     sendTo.sort(key = lambda msg: msg.priority)
                     sendTo.reverse()
 
-                print("El proceso " + senderProc.name + " ha enviado el mensaje. Pero no ha sido recibido.")
+                self.outPut("El proceso " + senderProc.name + " ha enviado el mensaje. Pero no ha sido recibido.")
         else:
             sendTo.append(m)
             # print(self.configuration.queues)
@@ -67,7 +69,7 @@ class ProcessController:
                 sendTo.sort(key = lambda msg: msg.priority)
                 sendTo.reverse()
             senderProc.active = False
-            print("El proceso " + senderProc.name + " ha enviado el mensaje. Pero no ha sido recibido.")
+            self.outPut("El proceso " + senderProc.name + " ha enviado el mensaje. Pero no ha sido recibido.")
 
     def receive(self, sender:str, receiver:str):
         if not self.processes.get(sender):
@@ -82,7 +84,7 @@ class ProcessController:
                 # addressing directo implicito/explicito
                 senderSignature = "[Explicito] De parte de " + m.sender.name if self.configuration.dir[-1] == "explicit" else "[Implicito] Tiene la firma de " + m.sender.name
                 foundIn = "" if self.configuration.dir[0] == "direct" else " del buzon"
-                print("El proceso " + receiverProc.name + " recibio el mensaje"+foundIn+": " + m.message + ". " + senderSignature)
+                self.outPut("El proceso " + receiverProc.name + " recibio el mensaje"+foundIn+": " + m.message + ". " + senderSignature)
                 searchIn.remove(m)
                 senderProc.active = True
                 receiverProc.waitingFrom = ""
@@ -93,7 +95,7 @@ class ProcessController:
             receiverProc.active = False 
             receiverProc.waitingFrom = sender
         elif self.configuration.recieve == "arrival-test":
-            print("No, no hay un mensaje de esa direccion. Puedes probar de nuevo.")
+            self.outPut("No, no hay un mensaje de esa direccion. Puedes probar de nuevo.")
 
 
 if __name__ == "__main__":

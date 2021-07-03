@@ -5,6 +5,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Program:
     def __init__(self, pui:mainWindow.Ui_MainWindow, pwindow:QtWidgets.QMainWindow):
+        # TODO if window closed kill timer
         self.window = pwindow
         self.ui = pui
         self.console = console
@@ -18,7 +19,7 @@ class Program:
         self.console.start()
 
     def printOutput(self, value, *args):
-        self.output.appendPlainText(value + (''.join(" "+str(elem) for elem in args) if len(args) != 0 else ""))
+        self.output.appendPlainText(str(value) + (''.join(" "+str(elem) for elem in args) if len(args) != 0 else ""))
 
     def reqInput(self, val):
         if val == None:
